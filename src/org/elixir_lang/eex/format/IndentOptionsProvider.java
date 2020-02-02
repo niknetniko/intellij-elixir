@@ -11,7 +11,6 @@ import org.elixir_lang.eex.File;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-
 // See https://github.com/JetBrains/intellij-plugins/blob/master/handlebars/src/com/dmarcotte/handlebars/format/HbFileIndentOptionsProvider.java
 public class IndentOptionsProvider extends FileIndentOptionsProvider {
     @Nullable

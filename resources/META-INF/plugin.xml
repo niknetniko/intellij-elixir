@@ -172,7 +172,7 @@
     <codeStyleSettingsProvider implementation="org.elixir_lang.formatter.settings.CodeStyleSettingsProvider"/>
     <lang.formatter language="Elixir" implementationClass="org.elixir_lang.formatting.ModelBuilder"/>
     <langCodeStyleSettingsProvider implementation="org.elixir_lang.formatter.settings.LanguageCodeStyleSettingsProvider"/>
-    <lang.formatter language="EEx" implementationClass="com.intellij.psi.templateLanguages.SimpleTemplateLanguageFormattingModelBuilder"/>
+    <lang.formatter language="EEx" implementationClass="org.elixir_lang.eex.format.FormattingModelBuilder"/>
     <fileIndentOptionsProvider implementation="org.elixir_lang.eex.format.IndentOptionsProvider"/>
 
     <lang.parserDefinition language="Elixir" implementationClass="org.elixir_lang.ElixirParserDefinition"/>
