@@ -169,6 +169,8 @@
     <lang.formatter language="Elixir" implementationClass="org.elixir_lang.formatting.ModelBuilder"/>
     <lang.formatter language="EEx" implementationClass="com.intellij.psi.templateLanguages.SimpleTemplateLanguageFormattingModelBuilder"/>
     <langCodeStyleSettingsProvider implementation="org.elixir_lang.formatter.settings.LanguageCodeStyleSettingsProvider"/>
+    <externalFormatProcessor implementation="org.elixir_lang.mix.formatter.MixFormatter"/>
+    <postFormatProcessor implementation="org.elixir_lang.mix.formatter.MixPostFormatProcessor"/>
 
     <!-- test -->
     <runLineMarkerContributor language="Elixir" implementationClass="org.elixir_lang.exunit.ExUnitLineMarkerProvider"/>
