@@ -3,16 +3,19 @@ package org.elixir_lang.mix.formatter;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.process.CapturingProcessAdapter;
-import com.intellij.execution.process.OSProcessHandler;
+import com.intellij.execution.process.CapturingProcessHandler;
 import com.intellij.execution.process.ProcessEvent;
+import com.intellij.execution.process.ProcessOutput;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationDisplayType;
 import com.intellij.notification.NotificationGroup;
 import com.intellij.notification.NotificationType;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.io.FileUtil;
@@ -21,14 +24,12 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.codeStyle.ExternalFormatProcessor;
 import org.elixir_lang.ElixirFileType;
-import org.elixir_lang.eex.file.Type;
 import org.elixir_lang.mix.Configuration;
 import org.elixir_lang.mix.configuration.Factory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Use {@code mix format} to format Elixir code.
@@ -91,20 +92,31 @@ public class MixFormatter implements ExternalFormatProcessor {
                     .withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE)
                     .withParameters(realPath);
 
-            OSProcessHandler handler = new OSProcessHandler(commandLine.withCharset(StandardCharsets.UTF_8));
-            handler.addProcessListener(new CapturingProcessAdapter() {
+            CapturingProcessHandler handler = new CapturingProcessHandler(commandLine) {
                 @Override
-                public void processTerminated(@NotNull ProcessEvent event) {
-                    int exitCode = event.getExitCode();
-                    if (exitCode == 0) {
-                        psiFile.getVirtualFile().refresh(false, false);
-                    } else {
-                        showFailedNotification(project, getOutput().getStderr());
-                    }
+                protected CapturingProcessAdapter createProcessAdapter(ProcessOutput processOutput) {
+                    return new CapturingProcessAdapter(processOutput) {
+                        @Override
+                        public void processTerminated(@NotNull ProcessEvent event) {
+                            if (event.getExitCode() == 0) {
+                                psiFile.getVirtualFile().refresh(false, false);
+                            } else {
+                                showFailedNotification(project, getOutput().getStderr());
+                            }
+                        }
+                    };
+                }
+            };
+
+            ProgressManager.getInstance().run(new Task.Backgroundable(project, "Formatting file...", false) {
+                @Override
+                public void run(@NotNull ProgressIndicator indicator) {
+                    handler.runProcessWithProgressIndicator(indicator, 1000);
                 }
             });
-            ApplicationManager.getApplication().executeOnPooledThread(handler::startNotify);
+//            ApplicationManager.getApplication().executeOnPooledThread(handler::startNotify);
         } catch (ExecutionException e) {
+            e.printStackTrace();
             showFailedNotification(project, e.getMessage());
         }
     }
@@ -112,7 +124,8 @@ public class MixFormatter implements ExternalFormatProcessor {
     private static final NotificationGroup NOTIFICATION_GROUP = new NotificationGroup("Mix formatter errors", NotificationDisplayType.BALLOON, true);
 
     private static void showFailedNotification(Project project, String stderr) {
-        Notification notification = NOTIFICATION_GROUP.createNotification(stderr, NotificationType.ERROR);
+        Notification notification = NOTIFICATION_GROUP.createNotification(
+                "Formatter failed", stderr, NotificationType.ERROR, null);
         notification.notify(project);
     }
 }

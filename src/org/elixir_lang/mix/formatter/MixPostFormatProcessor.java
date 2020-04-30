@@ -25,6 +25,7 @@ public class MixPostFormatProcessor implements PostFormatProcessor {
     @Override
     public TextRange processText(@NotNull PsiFile source, @NotNull TextRange rangeToReformat, @NotNull CodeStyleSettings settings) {
         if (!(source instanceof ElixirFile)) return rangeToReformat;
+        if (!rangeToReformat.equalsToRange(0, source.getTextLength())) return rangeToReformat;
         TextRange range = ExternalFormatProcessor.formatRangeInFile(source, rangeToReformat, false, false);
         return range != null ? range : rangeToReformat;
     }
