@@ -24,6 +24,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.codeStyle.ExternalFormatProcessor;
 import org.elixir_lang.ElixirFileType;
+import org.elixir_lang.ElixirScriptFileType;
 import org.elixir_lang.mix.Configuration;
 import org.elixir_lang.mix.configuration.Factory;
 import org.jetbrains.annotations.NotNull;
@@ -36,14 +37,14 @@ import java.io.File;
  *
  * @author Niko Strijbol
  */
-@SuppressWarnings({"UnstableApiUsage", "MissingRecentApi"})
+@SuppressWarnings({"UnstableApiUsage"})
 public class MixFormatter implements ExternalFormatProcessor {
 
     private static final Logger LOG = Logger.getInstance(MixFormatter.class);
 
     @Override
     public boolean activeForFile(@NotNull PsiFile source) {
-        return source.getFileType() instanceof ElixirFileType || source.getFileType() instanceof ElixirFileType.ElixirScriptFileType;
+        return source.getFileType() instanceof ElixirFileType || source.getFileType() instanceof ElixirScriptFileType;
     }
 
     @Nullable
